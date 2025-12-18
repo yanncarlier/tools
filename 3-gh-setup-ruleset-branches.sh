@@ -20,6 +20,7 @@ echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
 mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public) 
 
 echo "Found ${#REPOS[@]} repositories to process."
+echo "--------------------------------------------------"
 
 RULESET_NAME="protect-default-branch"
 
