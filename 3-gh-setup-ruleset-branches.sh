@@ -10,7 +10,7 @@
 #   bash 3-gh-setup-ruleset-branches.sh                                 # public repos
 #   INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh      # include private
 #   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
-#   REPOS="username/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh     # single repo
+#   REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh     # single repo
 #   REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh  # multiple
 
 set -euo pipefail
