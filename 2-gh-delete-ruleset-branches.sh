@@ -6,15 +6,24 @@ set -euo pipefail
 
 # REQUIRED: You must be authenticated with GitHub CLI
 # Run 'gh auth login' first if you haven't
+# OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
 
 # --- Configuration ---
 # Your GitHub username 
 OWNER="username" # Change this if necessary
 
 # --- Fetch Repositories ---
-echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
-# Add '--visibility public' to the list command
-mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public) 
+# Include private repos when fetching the list? Set to "true" to include private repos.
+INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
+
+if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
+  echo "Fetching repositories for $OWNER (including private repositories)..."
+  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
+else
+  echo "Fetching public repositories for $OWNER..."
+  # Add '--visibility public' to the list command
+  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
+fi
 
 echo "Found ${#REPOS[@]} repositories to process."
 echo "⚠️ WARNING: This script will DELETE ALL rulesets in these repositories!"
