@@ -1,56 +1,64 @@
 #!/usr/bin/env bash
 # File: 4-gh-advanced-security.sh
-# Run with: bash 4-gh-advanced-security.sh
+# Purpose: Configures GitHub Advanced Security across multiple repositories.
+# Enables: Advanced Security, Secret Scanning, Push Protection, Dependabot updates,
+# Vulnerability Alerts, CodeQL default-setup, and creates Dependabot/CodeQL workflow files.
+#
+# Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
+# Note: Advanced Security requires GitHub Enterprise with GHAS enabled.
+#
+# Usage Examples:
+#   bash 4-gh-advanced-security.sh                                      # hardcoded repos
+#   FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+#   FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+#   CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh  # CodeQL only
+#   REPOS_TO_PROCESS=("repo1") OWNER="yanncarlier" bash 4-gh-advanced-security.sh
 
 set -euo pipefail
 
-# REQUIRED: You must be authenticated with GitHub CLI
-# Run `gh auth login` first if you haven't
-
-# How to run now:
-# Non-interactive (default):
-# REPOS_TO_PROCESS="test" OWNER="username" bash 4-gh-advanced-security.sh
-
-# --- Configuration ---
-# Your GitHub username (can be set via environment: `OWNER=you`)
+# === CONFIGURATION ===
+# === CONFIGURATION ===
+# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
 OWNER=${OWNER:-"username"}
 
-# Optional: target specific repos (example: REPOS=("demo-advanced-security" "another-repo"))
-# If empty, script will fetch all *public* repositories for the owner
-# By default this file may contain a short list; set the environment
-# variable `FETCH_ALL_PUBLIC_REPOS=true` to force the script to fetch
-# all public repos for the owner from GitHub instead of using the
-# hardcoded list below.
+# REPOS_TO_PROCESS: List of repos to configure. If empty and FETCH_ALL_PUBLIC_REPOS=true,
+# fetches repos from GitHub. Default hardcoded list: ("demo-advanced-security")
+# Set via environment: REPOS_TO_PROCESS=("repo1" "repo2") or use FETCH_ALL_PUBLIC_REPOS=true
 REPOS_TO_PROCESS=("demo-advanced-security")
 
-# Allow a quick override to fetch all public repos via environment.
-# Usage: `FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh`
-# To include private repos as well:
-# Usage: `FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh`
+# FETCH_ALL_PUBLIC_REPOS: If true, override REPOS_TO_PROCESS and fetch all repos for OWNER
+# from GitHub instead of using the hardcoded list.
+# Usage: `FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh`
 if [ "${FETCH_ALL_PUBLIC_REPOS:-false}" = "true" ]; then
   REPOS_TO_PROCESS=()
 fi
 
-# If true, include private repos when fetching all repos
-# Default: false (only public repos)
-# Usage: `INCLUDE_PRIVATE_REPOS=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh`
+# INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
+# Default: false (public repos only). Set to "true" to include private repos.
+# Usage: `FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh`
 INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
 
-# Prompt before making each API change?
-# Set the env var `PROMPT_BEFORE_API=true` to enable interactive prompts.
-# By default the script runs non-interactively (auto-approve changes).
+# PROMPT_BEFORE_API: If true, prompt user before each API call (interactive mode)
+# Default: false (non-interactive, auto-approve). Usage: `PROMPT_BEFORE_API=true bash 4-gh-advanced-security.sh`
 PROMPT_BEFORE_API=${PROMPT_BEFORE_API:-false}
 
-# Optional controls
+# ENABLE_PRIVATE_VULN_REPORTING: Enable private vulnerability reporting for all repos
+# Default: false. Set to true if you want to enable private vuln reporting.
 ENABLE_PRIVATE_VULN_REPORTING=false
-# CodeQL default setup (customize to your needs)
-CODEQL_LANGUAGES=("javascript-typescript" "python")
+
+# CodeQL Configuration (auto-detected per repo language; these are defaults/fallbacks)
+# CODEQL_QUERY_SUITE: "default" (recommended) or "security-and-quality"
 CODEQL_QUERY_SUITE="default"
+# CODEQL_THREAT_MODEL: "remote" or "local" (determines analysis scope)
 CODEQL_THREAT_MODEL="remote"
+# CODEQL_SCHEDULE: Schedule for periodic CodeQL runs (e.g., "weekly")
 CODEQL_SCHEDULE="weekly"
-# If true, only run the CodeQL default-setup steps and skip other repo changes
-# Usage: `CODEQL_ONLY=true OWNER=... FETCH_ALL_PUBLIC_REPOS=true bash 4-gh-advanced-security.sh`
+
+# CODEQL_ONLY: If true, only run CodeQL setup steps; skip other security configurations
+# Usage: `CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh`
 CODEQL_ONLY=${CODEQL_ONLY:-false}
+
+# === FETCH REPOSITORIES ===
 
 echo "Fetching repositories for $OWNER..."
 if [ ${#REPOS_TO_PROCESS[@]} -eq 0 ]; then

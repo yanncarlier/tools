@@ -1,33 +1,47 @@
 #!/usr/bin/env bash
 # File: 3-gh-setup-ruleset-branches.sh
-# Run with: bash 3-gh-setup-ruleset-branches.sh
+# Purpose: Creates a dev branch and sets up repository rulesets with branch protection.
+# Rulesets enforce branch protection policies (require PR reviews, block force pushes, etc.).
+# Admins (including script runner) can bypass these rules when needed.
+#
+# Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
+#
+# Usage Examples:
+#   bash 3-gh-setup-ruleset-branches.sh                                 # public repos
+#   INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh      # include private
+#   OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
+#   REPOS="yanncarlier/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh     # single repo
+#   REPOS="yanncarlier/repo1,yanncarlier/repo2" bash 3-gh-setup-ruleset-branches.sh  # multiple
 
 set -euo pipefail
 
 # REQUIRED: You must be authenticated with GitHub CLI
 # Run `gh auth login` first if you haven't
-# Example: OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
 
-# --- Configuration ---
-# Your GitHub username (can be set via environment: `OWNER=you`)
+# === CONFIGURATION ===
+# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
 OWNER=${OWNER:-"username"}
 
-# Target specific repo as requested
-# You can pass a single repo or comma-separated list via the environment:
-#   REPOS="owner/repo" OR REPOS="owner/repo1,owner/repo2"
-# Or set REPOS as an array in the script: REPOS=("owner/repo")
+# REPOS: Target specific repo(s). Can be set via environment as single or comma-separated list.
+# Examples: REPOS="owner/repo" or REPOS="owner/repo1,owner/repo2"
+# If not provided, script fetches all repos for OWNER based on INCLUDE_PRIVATE_REPOS flag.
 
-# --- Fetch Repositories ---
-# Include private repos when fetching the list? Set to "true" to include private repos.
+# === FETCH REPOSITORIES ===
+# INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
+# Default: false (public repos only). Set to "true" to include private repos.
+# Requires gh CLI token with private repo access scope.
 INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
 
 # If the user provided REPOS via the environment, honor it and convert to an array.
 if [ -n "${REPOS:-}" ]; then
   echo "Using provided REPOS from environment"
+  # Convert comma-separated list to array, handling spaces and "owner/repo" format
   IFS=',' read -r -a __tmp <<< "$REPOS"
   REPOS=()
   for r in "${__tmp[@]}"; do
+    # Trim whitespace
     r="${r// /}"
+    # Check if already in "owner/repo" format; if not, add OWNER prefix
     if [[ "$r" == */* ]]; then
       REPOS+=("$r")
     else
@@ -35,12 +49,14 @@ if [ -n "${REPOS:-}" ]; then
     fi
   done
 else
+  # REPOS not provided: fetch from GitHub based on INCLUDE_PRIVATE_REPOS flag
   if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
     echo "Fetching repositories for $OWNER (including private repositories)..."
+    # Fetch all repos (public + private) for the owner without visibility filter
     mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
   else
     echo "Fetching public repositories for $OWNER..."
-    # Add '--visibility public' to the list command
+    # Fetch only public repos for the owner
     mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
   fi
 fi
