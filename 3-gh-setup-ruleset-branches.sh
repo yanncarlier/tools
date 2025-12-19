@@ -9,10 +9,10 @@ set -euo pipefail
 
 # --- Configuration ---
 # Your GitHub username
-OWNER="yanncarlier"
+OWNER="username"
 
 # Target specific repo as requested
-# REPOS=("yanncarlier/tools")
+# REPOS=("username/tools")
 
 # --- Fetch Repositories ---
 echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
@@ -20,6 +20,7 @@ echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
 mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public) 
 
 echo "Found ${#REPOS[@]} repositories to process."
+echo "--------------------------------------------------"
 
 RULESET_NAME="protect-default-branch"
 

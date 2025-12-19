@@ -9,9 +9,10 @@ set -euo pipefail
 
 # --- Configuration ---
 # Your GitHub username
-OWNER="yanncarlier"
-# Target specific repo as requested
-# REPOS=("yanncarlier/tools")
+OWNER="username"
+
+# Target specific repo as requesteds
+# REPOS=("username/tools")
 # Name of the development branch you want everywhere
 DEV_BRANCH="dev"
 # Optional: list of repos (if empty, script will fetch all repos you have admin access to)
