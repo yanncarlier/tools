@@ -9,9 +9,9 @@
 # Usage Examples:
 #   bash 3-gh-setup-ruleset-branches.sh                                 # public repos
 #   INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh      # include private
-#   OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
-#   REPOS="yanncarlier/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh     # single repo
-#   REPOS="yanncarlier/repo1,yanncarlier/repo2" bash 3-gh-setup-ruleset-branches.sh  # multiple
+#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
+#   REPOS="username/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh     # single repo
+#   REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh  # multiple
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ set -euo pipefail
 # Run `gh auth login` first if you haven't
 
 # === CONFIGURATION ===
-# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
+# OWNER: GitHub user or org name (override via environment: OWNER="username")
 OWNER=${OWNER:-"username"}
 
 # REPOS: Target specific repo(s). Can be set via environment as single or comma-separated list.

@@ -9,16 +9,16 @@
 #
 # Usage Examples:
 #   bash 4-gh-advanced-security.sh                                      # hardcoded repos
-#   FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
-#   FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
-#   CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh  # CodeQL only
-#   REPOS_TO_PROCESS=("repo1") OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+#   FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+#   FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+#   CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh  # CodeQL only
+#   REPOS_TO_PROCESS=("repo1") OWNER="username" bash 4-gh-advanced-security.sh
 
 set -euo pipefail
 
 # === CONFIGURATION ===
 # === CONFIGURATION ===
-# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
+# OWNER: GitHub user or org name (override via environment: OWNER="username")
 OWNER=${OWNER:-"username"}
 
 # REPOS_TO_PROCESS: List of repos to configure. If empty and FETCH_ALL_PUBLIC_REPOS=true,
@@ -28,14 +28,14 @@ REPOS_TO_PROCESS=("demo-advanced-security")
 
 # FETCH_ALL_PUBLIC_REPOS: If true, override REPOS_TO_PROCESS and fetch all repos for OWNER
 # from GitHub instead of using the hardcoded list.
-# Usage: `FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh`
+# Usage: `FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh`
 if [ "${FETCH_ALL_PUBLIC_REPOS:-false}" = "true" ]; then
   REPOS_TO_PROCESS=()
 fi
 
 # INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
 # Default: false (public repos only). Set to "true" to include private repos.
-# Usage: `FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh`
+# Usage: `FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh`
 INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
 
 # PROMPT_BEFORE_API: If true, prompt user before each API call (interactive mode)
@@ -55,7 +55,7 @@ CODEQL_THREAT_MODEL="remote"
 CODEQL_SCHEDULE="weekly"
 
 # CODEQL_ONLY: If true, only run CodeQL setup steps; skip other security configurations
-# Usage: `CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh`
+# Usage: `CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh`
 CODEQL_ONLY=${CODEQL_ONLY:-false}
 
 # === FETCH REPOSITORIES ===

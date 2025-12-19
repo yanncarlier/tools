@@ -9,8 +9,8 @@
 # Usage Examples:
 #   bash 1-gh-setup-dev-branches.sh                              # public repos only
 #   INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh   # include private repos
-#   OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
-#
+#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
+#s
 # Notes:
 #   - Use OWNER env var to override the hardcoded owner (repo must exist for authenticated user)
 #   - INCLUDE_PRIVATE_REPOS=true fetches all repos (requires gh token with repo scope)
@@ -20,7 +20,7 @@
 set -euo pipefail
 
 # === CONFIGURATION ===
-# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
+# OWNER: GitHub user or org name (override via environment: OWNER="username")
 OWNER=${OWNER:-"username"}
 
 # DEV_BRANCH: Name of the branch to create in all repositories (default: 'dev')
