@@ -12,8 +12,8 @@ set -euo pipefail
 # REPOS_TO_PROCESS="test" OWNER="username" bash 4-gh-advanced-security.sh
 
 # --- Configuration ---
-# Your GitHub username
-OWNER="username"
+# Your GitHub username (can be set via environment: `OWNER=you`)
+OWNER=${OWNER:-"username"}
 
 # Optional: target specific repos (example: REPOS=("demo-advanced-security" "another-repo"))
 # If empty, script will fetch all *public* repositories for the owner
