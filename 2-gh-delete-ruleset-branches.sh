@@ -1,42 +1,59 @@
 #!/usr/bin/env bash
 # File: 2-gh-delete-ruleset-branches.sh
-# Run with: bash 2-gh-delete-ruleset-branches.sh
+# Purpose: Deletes all repository rulesets from specified repositories.
+# Rulesets are GitHub branch protection rules (require PR reviews, block deletions, etc.).
+# Use this to reset protection policies or prepare for fresh configuration.
+#
+# Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
+# ⚠️  WARNING: This script DELETES all rulesets. Use with caution!
+#
+# Usage Examples:
+#   bash 2-gh-delete-ruleset-branches.sh                           # public repos
+#   INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh   # include private
+#   OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
 
 set -euo pipefail
 
-# REQUIRED: You must be authenticated with GitHub CLI
-# Run 'gh auth login' first if you haven't
+# === CONFIGURATION ===
+# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
+OWNER=${OWNER:-"username"}
 
-# --- Configuration ---
-# Your GitHub username 
-OWNER="username" # Change this if necessary
+# === FETCH REPOSITORIES ===
+# INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
+# Default: false (public repos only). Set to "true" to include private repos.
+# Requires gh CLI token with private repo access scope.
+INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
 
-# --- Fetch Repositories ---
-echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
-# Add '--visibility public' to the list command
-mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public) 
+if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
+  echo "Fetching repositories for $OWNER (including private repositories)..."
+  # Fetch all repos (public + private) for the owner without visibility filter
+  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
+else
+  echo "Fetching public repositories for $OWNER..."
+  # Fetch only public repos for the owner
+  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
+fi
 
 echo "Found ${#REPOS[@]} repositories to process."
-echo "⚠️ WARNING: This script will DELETE ALL rulesets in these repositories!"
+echo "⚠️  WARNING: This script will DELETE ALL rulesets in these repositories!"
 echo "--------------------------------------------------"
 
-# --- Processing Loop ---
+# === PROCESS REPOSITORIES ===
 for REPO in "${REPOS[@]}"; do
   echo "Processing $REPO..."
 
-  # 1. Fetch ALL Ruleset IDs for the current repository
-  # We use the corrected JQ filter to handle the root-level array.
-  # We want a stream of all IDs, so we use '.[] | .id'
+  # Fetch all ruleset IDs for this repository
+  # GitHub API returns an array of rulesets; extract the .id field from each
   RULESET_IDS=$(gh api "repos/$REPO/rulesets" --jq '.[] | .id // empty')
 
   if [[ -z "$RULESET_IDS" ]]; then
     echo "  -> No rulesets found."
   else
-    # 2. Iterate through the stream of IDs and delete each one
+    # Iterate through each ruleset ID and delete it
     while IFS= read -r ID; do
       if [[ -n "$ID" ]]; then
         echo "  -> Deleting ruleset ID: $ID"
-        # The DELETE method only requires the ruleset ID in the path
+        # Call DELETE on the ruleset endpoint; on success, report completion
         if gh api "repos/$REPO/rulesets/$ID" --method DELETE >/dev/null 2>&1; then
           echo "  -> SUCCESS: Ruleset $ID deleted."
         else
