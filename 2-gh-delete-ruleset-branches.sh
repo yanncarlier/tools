@@ -10,12 +10,12 @@
 # Usage Examples:
 #   bash 2-gh-delete-ruleset-branches.sh                           # public repos
 #   INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh   # include private
-#   OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
+#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
 
 set -euo pipefail
 
 # === CONFIGURATION ===
-# OWNER: GitHub user or org name (override via environment: OWNER="yanncarlier")
+# OWNER: GitHub user or org name (override via environment: OWNER="username")
 OWNER=${OWNER:-"username"}
 
 # === FETCH REPOSITORIES ===

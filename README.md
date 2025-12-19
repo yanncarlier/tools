@@ -31,7 +31,7 @@ bash 1-gh-setup-dev-branches.sh
 INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
 
 # Target specific owner
-OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
+OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
 ```
 
 **Configuration**:
@@ -64,7 +64,7 @@ bash 2-gh-delete-ruleset-branches.sh
 INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
 
 # Target specific owner
-OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
+OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
 ```
 
 **Configuration**:
@@ -93,13 +93,13 @@ bash 3-gh-setup-ruleset-branches.sh
 INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
 
 # Target specific owner
-OWNER="yanncarlier" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
+OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
 
 # Target single repo
-REPOS="yanncarlier/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh
+REPOS="username/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh
 
 # Target multiple repos
-REPOS="yanncarlier/repo1,yanncarlier/repo2" bash 3-gh-setup-ruleset-branches.sh
+REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh
 ```
 
 **Configuration**:
@@ -140,16 +140,16 @@ Enables repository-level security features, Dependabot configuration, and CodeQL
 bash 4-gh-advanced-security.sh
 
 # Configure all public repos for owner
-FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # Include private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # CodeQL setup only (skip other steps)
-CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # Interactive mode (prompt before each change)
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 ```
 
 **Configuration**:
@@ -204,37 +204,37 @@ The script automatically detects repo languages and enables CodeQL for supported
 ### Batch Configuration for All Personal Repos
 ```bash
 # Configure all public repos with Advanced Security
-FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # Configure all public + private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 ```
 
 ### Target Specific Repositories
 ```bash
 # Single repo with ruleset and branch
-REPOS="yanncarlier/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh
+REPOS="username/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh
 
 # Multiple repos
-REPOS="yanncarlier/repo1,yanncarlier/repo2,yanncarlier/repo3" bash 3-gh-setup-ruleset-branches.sh
+REPOS="username/repo1,username/repo2,username/repo3" bash 3-gh-setup-ruleset-branches.sh
 
 # Multiple repos with advanced security
-REPOS_TO_PROCESS=("repo1" "repo2") OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+REPOS_TO_PROCESS=("repo1" "repo2") OWNER="username" bash 4-gh-advanced-security.sh
 ```
 
 ### Interactive Mode (Confirm Each Change)
 ```bash
 # Prompt before each API call
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 ```
 
 ### CodeQL Re-Configuration
 ```bash
 # Re-run CodeQL setup for all public repos
-CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="yanncarlier" bash 4-gh-advanced-security.sh
+CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # Re-run CodeQL for specific repo
-CODEQL_ONLY=true REPOS="yanncarlier/v0-stable-coins" bash 4-gh-advanced-security.sh
+CODEQL_ONLY=true REPOS="username/v0-stable-coins" bash 4-gh-advanced-security.sh
 ```
 
 ---
@@ -270,7 +270,7 @@ CODEQL_ONLY=true REPOS="yanncarlier/v0-stable-coins" bash 4-gh-advanced-security
 
 ### "the owner handle 'username' was not recognized"
 - **Cause**: Script is using hardcoded `"username"` instead of actual owner name
-- **Fix**: Set `OWNER` environment variable: `OWNER="yanncarlier" bash script.sh`
+- **Fix**: Set `OWNER` environment variable: `OWNER="username" bash script.sh`
 
 ### "CodeQL default-setup did not reach 'configured' state"
 - **Cause**: CodeQL configuration pending or validation running
