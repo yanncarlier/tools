@@ -6,18 +6,44 @@ set -euo pipefail
 
 # REQUIRED: You must be authenticated with GitHub CLI
 # Run `gh auth login` first if you haven't
+# Example: OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
 
 # --- Configuration ---
-# Your GitHub username
-OWNER="username"
+# Your GitHub username (can be set via environment: `OWNER=you`)
+OWNER=${OWNER:-"username"}
 
 # Target specific repo as requested
-# REPOS=("username/tools")
+# You can pass a single repo or comma-separated list via the environment:
+#   REPOS="owner/repo" OR REPOS="owner/repo1,owner/repo2"
+# Or set REPOS as an array in the script: REPOS=("owner/repo")
 
 # --- Fetch Repositories ---
-echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
-# Add '--visibility public' to the list command
-mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public) 
+# Include private repos when fetching the list? Set to "true" to include private repos.
+INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
+
+# If the user provided REPOS via the environment, honor it and convert to an array.
+if [ -n "${REPOS:-}" ]; then
+  echo "Using provided REPOS from environment"
+  IFS=',' read -r -a __tmp <<< "$REPOS"
+  REPOS=()
+  for r in "${__tmp[@]}"; do
+    r="${r// /}"
+    if [[ "$r" == */* ]]; then
+      REPOS+=("$r")
+    else
+      REPOS+=("$OWNER/$r")
+    fi
+  done
+else
+  if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
+    echo "Fetching repositories for $OWNER (including private repositories)..."
+    mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
+  else
+    echo "Fetching public repositories for $OWNER..."
+    # Add '--visibility public' to the list command
+    mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
+  fi
+fi
 
 echo "Found ${#REPOS[@]} repositories to process."
 echo "--------------------------------------------------"
