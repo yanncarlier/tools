@@ -9,7 +9,7 @@ set -euo pipefail
 
 # --- Configuration ---
 # Your GitHub username 
-OWNER="yanncarlier" # Change this if necessary
+OWNER="username" # Change this if necessary
 
 # --- Fetch Repositories ---
 echo "Fetching ALL *PUBLIC* repositories for $OWNER..."

@@ -9,10 +9,10 @@ set -euo pipefail
 
 # --- Configuration ---
 # Your GitHub username
-OWNER="yanncarlier"
+OWNER="username"
 
 # Target specific repo as requested
-# REPOS=("yanncarlier/tools")
+# REPOS=("username/tools")
 
 # --- Fetch Repositories ---
 echo "Fetching ALL *PUBLIC* repositories for $OWNER..."
