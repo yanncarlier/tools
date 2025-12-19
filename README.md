@@ -96,7 +96,7 @@ INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
 OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
 
 # Target single repo
-REPOS="username/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh
+REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
 
 # Target multiple repos
 REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh
@@ -199,6 +199,59 @@ The script automatically detects repo languages and enables CodeQL for supported
 
 ---
 
+### 5. `5-gh-copilot-code-review.sh`
+**Purpose**: Configures GitHub Copilot Code Review rulesets for automated PR analysis.
+
+Sets up rulesets to enforce Copilot-powered code reviews and static analysis on pull requests targeting the default branch. Admins can bypass rules when needed for emergency deployments.
+
+**Quick Start**:
+```bash
+# Configure all public repos
+FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+
+# Include private repos
+FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+
+# Target single repo
+REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
+
+# Target multiple repos
+REPOS="username/repo1,username/repo2" bash 5-gh-copilot-code-review.sh
+
+# Interactive mode (confirm before each change)
+PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+```
+
+**Configuration**:
+- `OWNER`: GitHub user or org name (default: `"username"` — override via env)
+- `REPOS`: Specific repo(s) to target; supports single, comma-separated, or empty (fetch all)
+- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub instead of hardcoded list
+- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
+- `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
+- `RULESET_NAME`: Name of the Copilot ruleset (default: `"copilot-code-review-default"`)
+- `ENABLE_DISMISS_STALE_APPROVALS`: Auto-dismiss reviews on new commits (default: `true`)
+
+**What It Does**:
+1. Skips archived repositories
+2. Verifies Copilot is enabled in the organization
+3. Deletes any existing Copilot Code Review ruleset with the same name
+4. Creates a new ruleset with:
+   - **Target**: Default branch (`~DEFAULT_BRANCH`)
+   - **Enforcement**: Active (required, not advisory)
+   - **Rules**:
+     - Require Copilot code review on all PRs
+     - Auto-dismiss stale reviews when new commits pushed
+     - Require review thread resolution before merge
+     - Disallow automatic approval after initial feedback
+   - **Bypass**: Repository admins (ID 5) can always bypass the requirement
+
+**Requirements**:
+- Organization must have **GitHub Copilot Enterprise** or **GitHub Copilot Team** enabled
+- Script will warn if Copilot is not detected but will attempt setup
+- Admin access to target repositories
+
+---
+
 ## Common Usage Patterns
 
 ### Batch Configuration for All Personal Repos
@@ -208,15 +261,24 @@ FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # Configure all public + private repos
 FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+
+# Setup Copilot Code Review on all repos
+FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 ```
 
 ### Target Specific Repositories
 ```bash
 # Single repo with ruleset and branch
-REPOS="username/v0-stable-coins" bash 3-gh-setup-ruleset-branches.sh
+REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
+
+# Single repo with Copilot Code Review
+REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 
 # Multiple repos
 REPOS="username/repo1,username/repo2,username/repo3" bash 3-gh-setup-ruleset-branches.sh
+
+# Multiple repos with Copilot Code Review
+REPOS="username/repo1,username/repo2" bash 5-gh-copilot-code-review.sh
 
 # Multiple repos with advanced security
 REPOS_TO_PROCESS=("repo1" "repo2") OWNER="username" bash 4-gh-advanced-security.sh
@@ -224,8 +286,9 @@ REPOS_TO_PROCESS=("repo1" "repo2") OWNER="username" bash 4-gh-advanced-security.
 
 ### Interactive Mode (Confirm Each Change)
 ```bash
-# Prompt before each API call
+# Prompt before each API call (works with any script)
 PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 ```
 
 ### CodeQL Re-Configuration
@@ -234,7 +297,16 @@ PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-ad
 CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
 # Re-run CodeQL for specific repo
-CODEQL_ONLY=true REPOS="username/v0-stable-coins" bash 4-gh-advanced-security.sh
+CODEQL_ONLY=true REPOS="username/my-repo" bash 4-gh-advanced-security.sh
+```
+
+### Combined Security Setup
+```bash
+# Full security stack: dev branches + rulesets + advanced security + Copilot Code Review
+OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
+REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
+REPOS_TO_PROCESS=("my-repo") OWNER="username" bash 4-gh-advanced-security.sh
+REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 ```
 
 ---
@@ -263,6 +335,14 @@ CODEQL_ONLY=true REPOS="username/v0-stable-coins" bash 4-gh-advanced-security.sh
 - `CODEQL_QUERY_SUITE`: `"default"` or `"security-and-quality"`
 - `CODEQL_THREAT_MODEL`: `"remote"` or `"local"`
 - `REPOS_TO_PROCESS`: Specific repos to target
+
+### Script 5: `5-gh-copilot-code-review.sh`
+- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub (`true`/`false`)
+- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (`true`/`false`)
+- `PROMPT_BEFORE_API`: Interactive mode (`true`/`false`)
+- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`)
+- `RULESET_NAME`: Name of Copilot ruleset (default: `"copilot-code-review-default"`)
+- `ENABLE_DISMISS_STALE_APPROVALS`: Auto-dismiss stale reviews (`true`/`false`)
 
 ---
 
