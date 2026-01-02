@@ -1,4 +1,10 @@
+
+
 # GitHub Tools Repository
+
+Use at Your Own Risk
+This is experimental/beta software. It may contain bugs or cause unexpected behavior.
+No warranties are provided. Use entirely at your own discretion and risk.
 
 A collection of Bash scripts to automate GitHub repository management and security configuration across multiple repositories using the GitHub CLI (`gh`).
 
@@ -129,73 +135,47 @@ REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh
 
 ---
 
-### 4. `4-gh-advanced-security.sh`
-**Purpose**: Configures comprehensive GitHub Advanced Security across multiple repositories.
+### 4. `4-gh-disable-codeql.sh`
+**Purpose**: Disables CodeQL code scanning across multiple repositories.
 
-Enables repository-level security features, Dependabot configuration, and CodeQL analysis with automatic language detection.
+Disables CodeQL default setup and optionally removes custom CodeQL workflow files from specified repositories.
 
 **Quick Start**:
 ```bash
-# Configure hardcoded repos only
-bash 4-gh-advanced-security.sh
+# Disable CodeQL for specific repos
+REPOS="repo1 repo2 repo3" OWNER="username" bash 4-gh-disable-codeql.sh
 
-# Configure all public repos for owner
-FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+# Disable CodeQL for all public repos and delete workflows
+FETCH_ALL_PUBLIC_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash 4-gh-disable-codeql.sh
 
 # Include private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
-
-# CodeQL setup only (skip other steps)
-CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
 
 # Interactive mode (prompt before each change)
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+PROMPT_BEFORE_API=true REPOS="repo1" OWNER="username" bash 4-gh-disable-codeql.sh
 ```
 
 **Configuration**:
 - `OWNER`: GitHub user or org name (default: `"username"` — override via env)
-- `REPOS_TO_PROCESS`: Specific repos; if empty and `FETCH_ALL_PUBLIC_REPOS=true`, fetches all
-- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub instead of using hardcoded list
-- `INCLUDE_PRIVATE_REPOS`: Include private repos (default: `false`)
+- `REPOS`: Space-separated list of repo names (no owner prefix)
+- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub instead of using REPOS list
+- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
 - `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
-- `CODEQL_ONLY`: Run only CodeQL setup; skip other security configs (default: `false`)
-- `ENABLE_PRIVATE_VULN_REPORTING`: Enable private vulnerability reporting (default: `false`)
-- `CODEQL_QUERY_SUITE`: `"default"` or `"security-and-quality"` (default: `"default"`)
-- `CODEQL_THREAT_MODEL`: `"remote"` or `"local"` (default: `"remote"`)
+- `DELETE_CODEQL_WORKFLOW`: Also delete `.github/workflows/codeql-analysis.yml` files (default: `false`)
 
 **What It Does**:
 
-1. **Repository-Level Security**:
-   - Enables Advanced Security (requires GHAS license)
-   - Enables Secret Scanning
-   - Enables Secret Scanning Push Protection
-   - Enables Dependabot version updates
+1. **Disable CodeQL Default Setup**:
+   - Sets CodeQL state to "not-configured" via GitHub API
+   - Only affects repositories where CodeQL is currently enabled
 
-2. **Dependabot**:
-   - Enables automated security fixes
-   - Enables vulnerability alerts
-   - Creates/updates `.github/dependabot.yml` config (npm, pip, github-actions)
+2. **Optional Workflow Deletion**:
+   - Removes custom CodeQL workflow files if `DELETE_CODEQL_WORKFLOW=true`
+   - Commits the deletion with message "chore: remove CodeQL workflow"
 
-3. **CodeQL**:
-   - Auto-detects repository languages
-   - Maps languages to CodeQL API tokens (`javascript-typescript`, `python`, `go`, `java-kotlin`, `ruby`, `c-cpp`, `csharp`)
-   - Configures CodeQL default-setup with best-fit query suite
-   - Creates/updates `.github/workflows/codeql-analysis.yml` workflow
-   - Polls until CodeQL reaches `"configured"` state
-   - Dispatches workflow if configuration pending
-
-4. **Renovate** (optional):
-   - Creates `.github/workflows/renovate.yml` (on-demand dispatch)
-
-**Automatic Language Detection**:
-The script automatically detects repo languages and enables CodeQL for supported languages:
-- JavaScript/TypeScript → `javascript-typescript`
-- Python → `python`
-- Go → `go`
-- Java → `java-kotlin`
-- Ruby → `ruby`
-- C/C++ → `c-cpp`
-- C# → `csharp`
+**Notes**:
+- Existing CodeQL alerts remain until manually dismissed
+- If issues persist, disable manually in repository settings under Code security and analysis → Code scanning
 
 ---
 
@@ -256,11 +236,11 @@ PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-co
 
 ### Batch Configuration for All Personal Repos
 ```bash
-# Configure all public repos with Advanced Security
-FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+# Disable CodeQL for all public repos
+FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
 
-# Configure all public + private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+# Disable CodeQL for all public + private repos
+FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
 
 # Setup Copilot Code Review on all repos
 FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
@@ -280,32 +260,24 @@ REPOS="username/repo1,username/repo2,username/repo3" bash 3-gh-setup-ruleset-bra
 # Multiple repos with Copilot Code Review
 REPOS="username/repo1,username/repo2" bash 5-gh-copilot-code-review.sh
 
-# Multiple repos with advanced security
-REPOS_TO_PROCESS=("repo1" "repo2") OWNER="username" bash 4-gh-advanced-security.sh
+# Disable CodeQL for multiple repos
+REPOS="repo1 repo2" OWNER="username" bash 4-gh-disable-codeql.sh
 ```
 
 ### Interactive Mode (Confirm Each Change)
 ```bash
 # Prompt before each API call (works with any script)
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
+PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
 PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 ```
 
-### CodeQL Re-Configuration
-```bash
-# Re-run CodeQL setup for all public repos
-CODEQL_ONLY=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-advanced-security.sh
 
-# Re-run CodeQL for specific repo
-CODEQL_ONLY=true REPOS="username/my-repo" bash 4-gh-advanced-security.sh
-```
 
 ### Combined Security Setup
 ```bash
-# Full security stack: dev branches + rulesets + advanced security + Copilot Code Review
+# Full security stack: dev branches + rulesets + Copilot Code Review (CodeQL disabled)
 OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
 REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
-REPOS_TO_PROCESS=("my-repo") OWNER="username" bash 4-gh-advanced-security.sh
 REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 ```
 
@@ -327,14 +299,11 @@ REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 ### Script 3: `3-gh-setup-ruleset-branches.sh`
 - `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`)
 
-### Script 4: `4-gh-advanced-security.sh`
+### Script 4: `4-gh-disable-codeql.sh`
 - `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub (`true`/`false`)
 - `PROMPT_BEFORE_API`: Interactive mode (`true`/`false`)
-- `CODEQL_ONLY`: Run only CodeQL setup (`true`/`false`)
-- `ENABLE_PRIVATE_VULN_REPORTING`: Enable private vuln reporting (`true`/`false`)
-- `CODEQL_QUERY_SUITE`: `"default"` or `"security-and-quality"`
-- `CODEQL_THREAT_MODEL`: `"remote"` or `"local"`
-- `REPOS_TO_PROCESS`: Specific repos to target
+- `DELETE_CODEQL_WORKFLOW`: Delete custom CodeQL workflow files (`true`/`false`)
+- `REPOS`: Space-separated list of repo names (no owner prefix)
 
 ### Script 5: `5-gh-copilot-code-review.sh`
 - `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub (`true`/`false`)
@@ -352,23 +321,7 @@ REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 - **Cause**: Script is using hardcoded `"username"` instead of actual owner name
 - **Fix**: Set `OWNER` environment variable: `OWNER="username" bash script.sh`
 
-### "CodeQL default-setup did not reach 'configured' state"
-- **Cause**: CodeQL configuration pending or validation running
-- **Fix**: 
-  - Check repo Actions tab for ongoing workflows
-  - Re-run script after 1-2 minutes
-  - Use `CODEQL_ONLY=true` to focus on CodeQL setup
 
-### "Failed to enable Advanced Security"
-- **Cause**: Repository may not have GHAS license, or insufficient permissions
-- **Fix**: 
-  - Verify organization has GitHub Enterprise with GHAS enabled
-  - Confirm user has admin access to repo
-  - Try `PROMPT_BEFORE_API=true` for detailed error messages
-
-### "No supported CodeQL languages detected"
-- **Cause**: Repository uses languages CodeQL doesn't support yet
-- **Fix**: Script will skip CodeQL; other security features still apply
 
 ---
 

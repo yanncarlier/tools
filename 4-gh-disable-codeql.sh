@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# File: disable-codeql.sh
+# File: 4-gh-disable-codeql.sh
 # Purpose: Disables CodeQL code scanning across multiple repositories.
 # This includes:
 # - Disabling CodeQL default setup (if enabled) via API using {"state": "not-configured"}.
