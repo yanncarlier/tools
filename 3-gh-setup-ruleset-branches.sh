@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # File: 3-gh-setup-ruleset-branches.sh
-# Purpose: Creates a dev branch and sets up repository rulesets with branch protection.
+# Purpose: Sets up repository rulesets with branch protection.
 # Rulesets enforce branch protection policies (require PR reviews, block force pushes, etc.).
 # Admins (including script runner) can bypass these rules when needed.
 #
@@ -66,31 +66,18 @@ echo "--------------------------------------------------"
 
 RULESET_NAME="protect-default-branch"
 
-# Get Current User ID
-YOUR_ID=$(gh api user --jq '.id')
-echo "Your GitHub user ID: $YOUR_ID"
-echo "Found ${#REPOS[@]} repositories to process"
 echo
 for REPO in "${REPOS[@]}"; do
   echo "=================================================="
   echo "Processing $REPO"
-  # 1. Ensure dev branch exists
-  if ! gh api "repos/$REPO/branches/dev" >/dev/null 2>&1; then
-    DEFAULT_BRANCH=$(gh api "repos/$REPO" --jq '.default_branch')
-    SHA=$(gh api "repos/$REPO/branches/$DEFAULT_BRANCH" --jq '.commit.sha')
-    echo "  -> Creating dev branch from $DEFAULT_BRANCH"
-    gh api "repos/$REPO/git/refs" -f ref="refs/heads/dev" -f sha="$SHA" >/dev/null
-  else
-    echo "  -> dev branch already exists"
-  fi
-  # 2. DELETE existing ruleset if it exists
+  # 1. DELETE existing ruleset if it exists
   # Fix: ensure '$REPO' (singular) is used for the API call
   EXISTING_ID=$(gh api "repos/$REPO/rulesets" --jq "map(select(.name == \"$RULESET_NAME\")) | .[0].id // empty")
   if [[ -n "$EXISTING_ID" ]]; then
     echo "  -> Found existing ruleset (ID: $EXISTING_ID). Deleting..."
     gh api "repos/$REPO/rulesets/$EXISTING_ID" --method DELETE >/dev/null
   fi
-  # 3. Define JSON Payload (Create new)
+  # 2. Define JSON Payload (Create new)
   # Fix: Change bypass_actors to use RepositoryRole (ID 5 for Admin) instead of RepositoryActor
   cat <<EOF > /tmp/ruleset.json
 {
@@ -126,7 +113,7 @@ for REPO in "${REPOS[@]}"; do
   ]
 }
 EOF
-  # 4. Create the Ruleset (POST)
+  # 3. Create the Ruleset (POST)
   if gh api "repos/$REPO/rulesets" --method POST --input /tmp/ruleset.json >/dev/null 2>&1; then
     echo "  -> Ruleset created successfully"
   else
