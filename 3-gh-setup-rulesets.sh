@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# File: 3-gh-setup-ruleset-branches.sh
+# File: 3-gh-setup-rulesets.sh
 # Purpose: Sets up repository rulesets with branch protection.
 # Rulesets enforce branch protection policies (require PR reviews, block force pushes, etc.).
 # Admins (including script runner) can bypass these rules when needed.
@@ -7,11 +7,11 @@
 # Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
 #
 # Usage Examples:
-#   bash 3-gh-setup-ruleset-branches.sh                                 # public repos
-#   INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh      # include private
-#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
-#   REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh     # single repo
-#   REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh  # multiple
+#   bash 3-gh-setup-rulesets.sh                                 # public repos
+#   INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-rulesets.sh      # include private
+#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-rulesets.sh
+#   REPOS="my-repo" bash 3-gh-setup-rulesets.sh     # single repo
+#   REPOS="repo1,repo2" bash 3-gh-setup-rulesets.sh  # multiple
 
 set -euo pipefail
 
@@ -23,7 +23,7 @@ set -euo pipefail
 OWNER=${OWNER:-"username"}
 
 # REPOS: Target specific repo(s). Can be set via environment as single or comma-separated list.
-# Examples: REPOS="owner/repo" or REPOS="owner/repo1,owner/repo2"
+# Examples: REPOS="my-repo" or REPOS="repo1,repo2"
 # If not provided, script fetches all repos for OWNER based on INCLUDE_PRIVATE_REPOS flag.
 
 # === FETCH REPOSITORIES ===
@@ -35,18 +35,14 @@ INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
 # If the user provided REPOS via the environment, honor it and convert to an array.
 if [ -n "${REPOS:-}" ]; then
   echo "Using provided REPOS from environment"
-  # Convert comma-separated list to array, handling spaces and "owner/repo" format
+  # Convert comma-separated list to array, handling spaces
   IFS=',' read -r -a __tmp <<< "$REPOS"
   REPOS=()
   for r in "${__tmp[@]}"; do
     # Trim whitespace
     r="${r// /}"
-    # Check if already in "owner/repo" format; if not, add OWNER prefix
-    if [[ "$r" == */* ]]; then
-      REPOS+=("$r")
-    else
-      REPOS+=("$OWNER/$r")
-    fi
+    # Always prefix with OWNER
+    REPOS+=("$OWNER/$r")
   done
 else
   # REPOS not provided: fetch from GitHub based on INCLUDE_PRIVATE_REPOS flag
