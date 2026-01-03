@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# File: 2-gh-delete-ruleset-branches.sh
+# File: 2-gh-delete-rulesets.sh
 # Purpose: Deletes all repository rulesets from specified repositories.
 # Rulesets are GitHub branch protection rules (require PR reviews, block deletions, etc.).
 # Use this to reset protection policies or prepare for fresh configuration.
@@ -8,9 +8,9 @@
 # ⚠️  WARNING: This script DELETES all rulesets. Use with caution!
 #
 # Usage Examples:
-#   bash 2-gh-delete-ruleset-branches.sh                           # public repos
-#   INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh   # include private
-#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
+#   bash 2-gh-delete-rulesets.sh                           # public repos
+#   INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-rulesets.sh   # include private
+#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-rulesets.sh
 
 set -euo pipefail
 
