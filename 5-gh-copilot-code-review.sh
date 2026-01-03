@@ -11,8 +11,8 @@
 #   bash 5-gh-copilot-code-review.sh                                      # hardcoded repos
 #   FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 #   FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
-#   REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh   # single repo
-#   REPOS="username/repo1,username/repo2" bash 5-gh-copilot-code-review.sh  # multiple
+#   REPOS="my-repo" bash 5-gh-copilot-code-review.sh   # single repo
+#   REPOS="repo1,repo2" bash 5-gh-copilot-code-review.sh  # multiple
 
 set -euo pipefail
 
@@ -21,7 +21,7 @@ set -euo pipefail
 OWNER=${OWNER:-"username"}
 
 # REPOS: Target specific repo(s). Can be set via environment as single or comma-separated list.
-# Examples: REPOS="owner/repo" or REPOS="owner/repo1,owner/repo2"
+# Examples: REPOS="my-repo" or REPOS="repo1,repo2"
 # If not provided, script fetches all repos for OWNER based on INCLUDE_PRIVATE_REPOS flag.
 
 # REPOS_TO_PROCESS: List of repos to configure. If empty and FETCH_ALL_PUBLIC_REPOS=true,
@@ -56,18 +56,14 @@ ENABLE_DISMISS_STALE_APPROVALS=true
 echo "Fetching repositories for $OWNER..."
 if [ -n "${REPOS:-}" ]; then
   echo "Using provided REPOS from environment"
-  # Convert comma-separated list to array, handling spaces and "owner/repo" format
+  # Convert comma-separated list to array, handling spaces
   IFS=',' read -r -a __tmp <<< "$REPOS"
   REPOS_TO_PROCESS=()
   for r in "${__tmp[@]}"; do
     # Trim whitespace
     r="${r// /}"
-    # Check if already in "owner/repo" format; if not, add OWNER prefix
-    if [[ "$r" == */* ]]; then
-      REPOS_TO_PROCESS+=("$r")
-    else
-      REPOS_TO_PROCESS+=("$OWNER/$r")
-    fi
+    # Always prefix with OWNER
+    REPOS_TO_PROCESS+=("$OWNER/$r")
   done
 else
   # REPOS not provided: fetch from GitHub based on INCLUDE_PRIVATE_REPOS flag
