@@ -16,7 +16,6 @@ A collection of Bash scripts to automate GitHub repository management and securi
   - `repo` (for public repos)
   - `read:org` (for organization data)
   - `admin:repo_hook` (for repository webhooks)
-  - Ensure private repo access if using `INCLUDE_PRIVATE_REPOS=true`
 - **Permissions**: Admin or write access to target repositories
 
 ---
@@ -30,21 +29,17 @@ Creates a `dev` branch (or custom name via `DEV_BRANCH`) from each repository's 
 
 **Quick Start**:
 ```bash
-# Process public repos only
+# Process public repos
 bash 1-gh-setup-dev-branches.sh
 
-# Include private repos
-INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
-
 # Target specific owner
-OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
+OWNER="username" bash 1-gh-setup-dev-branches.sh
 ```
 
 **Configuration**:
 - `OWNER`: GitHub user or org name (default: `"username"` — override via env)
 - `DEV_BRANCH`: Branch name to create (default: `"dev"`)
-- `REPOS_TO_PROCESS`: Specific repos to target; if empty, fetches from GitHub
-- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
+- `REPOS_TO_PROCESS`: Specific repos to target; if empty, fetches public repos from GitHub
 
 **What It Does**:
 1. Fetches repositories for the specified owner (public or public+private)
@@ -63,19 +58,15 @@ Rulesets define branch protection policies (require PR reviews, block deletions,
 
 **Quick Start**:
 ```bash
-# Process public repos only
+# Process public repos
 bash 2-gh-delete-ruleset-branches.sh
 
-# Include private repos
-INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
-
 # Target specific owner
-OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-ruleset-branches.sh
+OWNER="username" bash 2-gh-delete-ruleset-branches.sh
 ```
 
 **Configuration**:
 - `OWNER`: GitHub user or org name (default: `"username"` — override via env)
-- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
 
 **What It Does**:
 1. Fetches repositories for the specified owner
@@ -92,14 +83,11 @@ Combines branch creation with ruleset setup. Enforces branch protection policies
 
 **Quick Start**:
 ```bash
-# Process public repos only
+# Process public repos
 bash 3-gh-setup-ruleset-branches.sh
 
-# Include private repos
-INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
-
 # Target specific owner
-OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-ruleset-branches.sh
+OWNER="username" bash 3-gh-setup-ruleset-branches.sh
 
 # Target single repo
 REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
@@ -110,8 +98,7 @@ REPOS="username/repo1,username/repo2" bash 3-gh-setup-ruleset-branches.sh
 
 **Configuration**:
 - `OWNER`: GitHub user or org name (default: `"username"` — override via env)
-- `REPOS`: Specific repo(s) to target; supports single, comma-separated, or empty (fetch all)
-- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
+- `REPOS`: Specific repo(s) to target; supports single, comma-separated, or empty (fetch public repos)
 
 **What It Does**:
 1. Creates `dev` branch from default branch (if not exists)
@@ -146,10 +133,7 @@ Disables CodeQL default setup and optionally removes custom CodeQL workflow file
 REPOS="repo1 repo2 repo3" OWNER="username" bash 4-gh-disable-codeql.sh
 
 # Disable CodeQL for all public repos and delete workflows
-FETCH_ALL_PUBLIC_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash 4-gh-disable-codeql.sh
-
-# Include private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
+FETCH_ALL_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash 4-gh-disable-codeql.sh
 
 # Interactive mode (prompt before each change)
 PROMPT_BEFORE_API=true REPOS="repo1" OWNER="username" bash 4-gh-disable-codeql.sh
@@ -158,8 +142,7 @@ PROMPT_BEFORE_API=true REPOS="repo1" OWNER="username" bash 4-gh-disable-codeql.s
 **Configuration**:
 - `OWNER`: GitHub user or org name (default: `"username"` — override via env)
 - `REPOS`: Space-separated list of repo names (no owner prefix)
-- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub instead of using REPOS list
-- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
+- `FETCH_ALL_REPOS`: Fetch all public repos from GitHub instead of using REPOS list (default: `false`)
 - `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
 - `DELETE_CODEQL_WORKFLOW`: Also delete `.github/workflows/codeql-analysis.yml` files (default: `false`)
 
@@ -187,10 +170,7 @@ Sets up rulesets to enforce Copilot-powered code reviews and static analysis on 
 **Quick Start**:
 ```bash
 # Configure all public repos
-FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
-
-# Include private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 
 # Target single repo
 REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
@@ -199,14 +179,13 @@ REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 REPOS="username/repo1,username/repo2" bash 5-gh-copilot-code-review.sh
 
 # Interactive mode (confirm before each change)
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+PROMPT_BEFORE_API=true FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 ```
 
 **Configuration**:
 - `OWNER`: GitHub user or org name (default: `"username"` — override via env)
-- `REPOS`: Specific repo(s) to target; supports single, comma-separated, or empty (fetch all)
-- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub instead of hardcoded list
-- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (default: `false`)
+- `REPOS`: Specific repo(s) to target; supports single, comma-separated, or empty (fetch public repos)
+- `FETCH_ALL_REPOS`: Fetch all public repos from GitHub instead of hardcoded list (default: `false`)
 - `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
 - `RULESET_NAME`: Name of the Copilot ruleset (default: `"copilot-code-review-default"`)
 - `ENABLE_DISMISS_STALE_APPROVALS`: Auto-dismiss reviews on new commits (default: `true`)
@@ -237,13 +216,10 @@ PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-co
 ### Batch Configuration for All Personal Repos
 ```bash
 # Disable CodeQL for all public repos
-FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
-
-# Disable CodeQL for all public + private repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
+FETCH_ALL_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
 
 # Setup Copilot Code Review on all repos
-FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 ```
 
 ### Target Specific Repositories
@@ -267,16 +243,14 @@ REPOS="repo1 repo2" OWNER="username" bash 4-gh-disable-codeql.sh
 ### Interactive Mode (Confirm Each Change)
 ```bash
 # Prompt before each API call (works with any script)
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
-PROMPT_BEFORE_API=true FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+PROMPT_BEFORE_API=true FETCH_ALL_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
+PROMPT_BEFORE_API=true FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 ```
-
-
 
 ### Combined Security Setup
 ```bash
 # Full security stack: dev branches + rulesets + Copilot Code Review (CodeQL disabled)
-OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 1-gh-setup-dev-branches.sh
+OWNER="username" bash 1-gh-setup-dev-branches.sh
 REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
 REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 ```
@@ -287,31 +261,31 @@ REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
 
 ### Universal (All Scripts)
 - `OWNER`: GitHub user or organization name
-- `INCLUDE_PRIVATE_REPOS`: Include private repositories (`true`/`false`)
 
 ### Script 1: `1-gh-setup-dev-branches.sh`
 - `DEV_BRANCH`: Name of dev branch to create (default: `"dev"`)
-- `REPOS_TO_PROCESS`: Specific repos to target
+- `REPOS_TO_PROCESS`: Specific repos to target; if empty, fetches public repos from GitHub
 
 ### Script 2: `2-gh-delete-ruleset-branches.sh`
-- (Only uses `OWNER` and `INCLUDE_PRIVATE_REPOS`)
+- `OWNER`: GitHub user or organization name
 
 ### Script 3: `3-gh-setup-ruleset-branches.sh`
-- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`)
+- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`); if empty, fetches public repos from GitHub
 
 ### Script 4: `4-gh-disable-codeql.sh`
-- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub (`true`/`false`)
-- `PROMPT_BEFORE_API`: Interactive mode (`true`/`false`)
-- `DELETE_CODEQL_WORKFLOW`: Delete custom CodeQL workflow files (`true`/`false`)
+- `OWNER`: GitHub user or organization name
 - `REPOS`: Space-separated list of repo names (no owner prefix)
+- `FETCH_ALL_REPOS`: Fetch all public repos from GitHub instead of using REPOS list (default: `false`)
+- `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
+- `DELETE_CODEQL_WORKFLOW`: Also delete `.github/workflows/codeql-analysis.yml` files (default: `false`)
 
 ### Script 5: `5-gh-copilot-code-review.sh`
-- `FETCH_ALL_PUBLIC_REPOS`: Fetch all repos from GitHub (`true`/`false`)
-- `INCLUDE_PRIVATE_REPOS`: Include private repos when fetching (`true`/`false`)
-- `PROMPT_BEFORE_API`: Interactive mode (`true`/`false`)
-- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`)
+- `OWNER`: GitHub user or organization name
+- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`); if empty, fetches public repos from GitHub
+- `FETCH_ALL_REPOS`: Fetch all public repos from GitHub instead of hardcoded list (default: `false`)
+- `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
 - `RULESET_NAME`: Name of Copilot ruleset (default: `"copilot-code-review-default"`)
-- `ENABLE_DISMISS_STALE_APPROVALS`: Auto-dismiss stale reviews (`true`/`false`)
+- `ENABLE_DISMISS_STALE_APPROVALS`: Auto-dismiss reviews on new commits (default: `true`)
 
 ---
 

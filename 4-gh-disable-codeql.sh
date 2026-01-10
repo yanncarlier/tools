@@ -11,7 +11,7 @@
 # Usage Examples:
 #   REPOS="tools" OWNER="username" DELETE_CODEQL_WORKFLOW=true bash disable-codeql.sh
 #   REPOS="repo1 repo2 repo3" OWNER="username" bash disable-codeql.sh
-#   FETCH_ALL_PUBLIC_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash disable-codeql.sh
+#   FETCH_ALL_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash disable-codeql.sh
 #   PROMPT_BEFORE_API=true REPOS="tools" bash disable-codeql.sh
 
 set -euo pipefail
@@ -21,8 +21,7 @@ set -euo pipefail
 
 OWNER=${OWNER:-"username"}                    # GitHub username or organization
 REPOS=${REPOS:-""}                            # Space-separated list of repo names (no owner prefix)
-FETCH_ALL_PUBLIC_REPOS=${FETCH_ALL_PUBLIC_REPOS:-false}
-INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
+FETCH_ALL_REPOS=${FETCH_ALL_REPOS:-false}
 PROMPT_BEFORE_API=${PROMPT_BEFORE_API:-false}
 DELETE_CODEQL_WORKFLOW=${DELETE_CODEQL_WORKFLOW:-false}
 
@@ -31,20 +30,15 @@ echo "Fetching repositories for $OWNER..."
 
 REPOS_TO_PROCESS=()
 
-if [ "${FETCH_ALL_PUBLIC_REPOS}" = "true" ]; then
-  if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
-    echo "  (including both public and private repos)"
-    mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json name -q '.[].name')
-  else
-    echo "  (public repos only)"
-    mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json name -q '.[].name' --visibility public)
-  fi
+if [ "${FETCH_ALL_REPOS}" = "true" ]; then
+  echo "  (fetching all public repositories)"
+  mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json name -q '.[].name' --visibility public)
 else
   if [ -z "$REPOS" ]; then
     echo "ERROR: No repositories specified."
     echo "Provide a space-separated list via the REPOS variable:"
     echo "  REPOS=\"tools repo2 another-repo\" OWNER=\"username\" bash disable-codeql.sh"
-    echo "Or use FETCH_ALL_PUBLIC_REPOS=true to process all repos automatically."
+    echo "Or use FETCH_ALL_REPOS=true to process all repos automatically."
     exit 1
   fi
   # Split space-separated string into array

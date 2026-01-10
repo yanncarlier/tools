@@ -9,8 +9,7 @@
 #
 # Usage Examples:
 #   bash 2-gh-delete-rulesets.sh                           # public repos
-#   INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-rulesets.sh   # include private
-#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 2-gh-delete-rulesets.sh
+#   OWNER="username" bash 2-gh-delete-rulesets.sh
 
 set -euo pipefail
 
@@ -19,27 +18,16 @@ set -euo pipefail
 OWNER=${OWNER:-"username"}
 
 # === FETCH REPOSITORIES ===
-# INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
-# Default: false (public repos only). Set to "true" to include private repos.
-# Requires gh CLI token with private repo access scope.
-INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
+echo "Fetching public repositories for $OWNER..."
+# Fetch only public repos for the owner
+mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
 
-if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
-  echo "Fetching repositories for $OWNER (including private repositories)..."
-  # Fetch all repos (public + private) for the owner without visibility filter
-  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
-else
-  echo "Fetching public repositories for $OWNER..."
-  # Fetch only public repos for the owner
-  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
-fi
-
-echo "Found ${#REPOS[@]} repositories to process."
+echo "Found ${#REPOS_TO_PROCESS[@]} repositories to process."
 echo "⚠️  WARNING: This script will DELETE ALL rulesets in these repositories!"
 echo "--------------------------------------------------"
 
 # === PROCESS REPOSITORIES ===
-for REPO in "${REPOS[@]}"; do
+for REPO in "${REPOS_TO_PROCESS[@]}"; do
   echo "Processing $REPO..."
 
   # Fetch all ruleset IDs for this repository

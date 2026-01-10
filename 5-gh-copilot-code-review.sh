@@ -9,8 +9,7 @@
 #
 # Usage Examples:
 #   bash 5-gh-copilot-code-review.sh                                      # hardcoded repos
-#   FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
-#   FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+#   FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 #   REPOS="my-repo" bash 5-gh-copilot-code-review.sh   # single repo
 #   REPOS="repo1,repo2" bash 5-gh-copilot-code-review.sh  # multiple
 
@@ -24,21 +23,16 @@ OWNER=${OWNER:-"username"}
 # Examples: REPOS="my-repo" or REPOS="repo1,repo2"
 # If not provided, script fetches all repos for OWNER based on INCLUDE_PRIVATE_REPOS flag.
 
-# REPOS_TO_PROCESS: List of repos to configure. If empty and FETCH_ALL_PUBLIC_REPOS=true,
+# REPOS_TO_PROCESS: List of repos to configure. If empty and FETCH_ALL_REPOS=true,
 # fetches repos from GitHub. Default hardcoded list: empty (requires explicit action)
 REPOS_TO_PROCESS=()
 
-# FETCH_ALL_PUBLIC_REPOS: If true, override REPOS_TO_PROCESS and fetch all repos for OWNER
+# FETCH_ALL_REPOS: If true, override REPOS_TO_PROCESS and fetch all public repos for OWNER
 # from GitHub instead of using the hardcoded list.
-# Usage: `FETCH_ALL_PUBLIC_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh`
-if [ "${FETCH_ALL_PUBLIC_REPOS:-false}" = "true" ]; then
+# Usage: `FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh`
+if [ "${FETCH_ALL_REPOS:-false}" = "true" ]; then
   REPOS_TO_PROCESS=()
 fi
-
-# INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
-# Default: false (public repos only). Set to "true" to include private repos.
-# Usage: `FETCH_ALL_PUBLIC_REPOS=true INCLUDE_PRIVATE_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh`
-INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
 
 # PROMPT_BEFORE_API: If true, prompt user before each API call (interactive mode)
 # Default: false (non-interactive, auto-approve). Usage: `PROMPT_BEFORE_API=true bash 5-gh-copilot-code-review.sh`
@@ -66,17 +60,11 @@ if [ -n "${REPOS:-}" ]; then
     REPOS_TO_PROCESS+=("$OWNER/$r")
   done
 else
-  # REPOS not provided: fetch from GitHub based on INCLUDE_PRIVATE_REPOS flag
+  # REPOS not provided: fetch from GitHub
   if [ ${#REPOS_TO_PROCESS[@]} -eq 0 ]; then
-    if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
-      echo "  (including both public and private repos)"
-      # Fetch all repos (public + private) for the owner without visibility filter
-      mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
-    else
-      echo "  (public repos only; set INCLUDE_PRIVATE_REPOS=true to include private repos)"
-      # Fetch only public repos for the owner
-      mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
-    fi
+    echo "  (fetching public repositories)"
+    # Fetch only public repos for the owner
+    mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
   else
     # Repos specified: add OWNER prefix if not already present (handle "repo" → "owner/repo")
     REPOS_TO_PROCESS=( "${REPOS_TO_PROCESS[@]/#/$OWNER/}" )

@@ -8,8 +8,7 @@
 #
 # Usage Examples:
 #   bash 3-gh-setup-rulesets.sh                                 # public repos
-#   INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-rulesets.sh      # include private
-#   OWNER="username" INCLUDE_PRIVATE_REPOS=true bash 3-gh-setup-rulesets.sh
+#   OWNER="username" bash 3-gh-setup-rulesets.sh
 #   REPOS="my-repo" bash 3-gh-setup-rulesets.sh     # single repo
 #   REPOS="repo1,repo2" bash 3-gh-setup-rulesets.sh  # multiple
 
@@ -24,13 +23,7 @@ OWNER=${OWNER:-"username"}
 
 # REPOS: Target specific repo(s). Can be set via environment as single or comma-separated list.
 # Examples: REPOS="my-repo" or REPOS="repo1,repo2"
-# If not provided, script fetches all repos for OWNER based on INCLUDE_PRIVATE_REPOS flag.
-
-# === FETCH REPOSITORIES ===
-# INCLUDE_PRIVATE_REPOS: Include private repositories when fetching all repos
-# Default: false (public repos only). Set to "true" to include private repos.
-# Requires gh CLI token with private repo access scope.
-INCLUDE_PRIVATE_REPOS=${INCLUDE_PRIVATE_REPOS:-false}
+# If not provided, script fetches public repos for OWNER.
 
 # If the user provided REPOS via the environment, honor it and convert to an array.
 if [ -n "${REPOS:-}" ]; then
@@ -45,16 +38,10 @@ if [ -n "${REPOS:-}" ]; then
     REPOS+=("$OWNER/$r")
   done
 else
-  # REPOS not provided: fetch from GitHub based on INCLUDE_PRIVATE_REPOS flag
-  if [ "${INCLUDE_PRIVATE_REPOS}" = "true" ]; then
-    echo "Fetching repositories for $OWNER (including private repositories)..."
-    # Fetch all repos (public + private) for the owner without visibility filter
-    mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
-  else
-    echo "Fetching public repositories for $OWNER..."
-    # Fetch only public repos for the owner
-    mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
-  fi
+  # REPOS not provided: fetch public repositories from GitHub
+  echo "Fetching public repositories for $OWNER..."
+  # Fetch only public repos for the owner
+  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
 fi
 
 echo "Found ${#REPOS[@]} repositories to process."
