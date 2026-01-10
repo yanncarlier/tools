@@ -8,6 +8,7 @@
 #
 # Usage:
 #  OWNER="username" bash 2-gh-delete-rulesets.sh
+#  OWNER="username" REPOS="repo1,repo2" bash 2-gh-delete-rulesets.sh
 #
 # WARNING: This script deletes rulesets and cannot be undone. Review target
 # repositories carefully before running.
@@ -15,13 +16,28 @@
 set -euo pipefail
 
 # === CONFIGURATION ===
-# OWNER: GitHub user or org name (override via environment: OWNER="username")
 OWNER=${OWNER:-"username"}
 
-# === FETCH REPOSITORIES ===
-echo "Fetching public repositories for $OWNER..."
-# Fetch only public repos for the owner
-mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
+echo "Fetching repositories for $OWNER..."
+if [ -n "${REPOS:-}" ]; then
+  # Parse comma-separated REPOS from environment
+  echo "Using provided REPOS"
+  IFS=',' read -r -a REPOS_ARRAY <<< "$REPOS"
+  REPOS_TO_PROCESS=()
+  for r in "${REPOS_ARRAY[@]}"; do
+    # Trim whitespace and prefix with OWNER if needed
+    r="${r// /}"
+    if [[ "$r" == *"/"* ]]; then
+      REPOS_TO_PROCESS+=("$r")
+    else
+      REPOS_TO_PROCESS+=("$OWNER/$r")
+    fi
+  done
+else
+  # Fetch public repos for OWNER
+  echo "  (fetching public repositories)"
+  mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
+fi
 
 echo "Found ${#REPOS_TO_PROCESS[@]} repositories to process."
 echo "⚠️  WARNING: This script will DELETE ALL rulesets in these repositories!"
