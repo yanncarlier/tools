@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
-# File: 3-gh-setup-rulesets.sh
-# Purpose: Sets up repository rulesets with branch protection.
-# Rulesets enforce branch protection policies (require PR reviews, block force pushes, etc.).
-# Admins (including script runner) can bypass these rules when needed.
+# 3-gh-setup-rulesets.sh
+# Summary: Create or replace repository rulesets to enforce branch protection
+# policies for target repositories. Uses the GitHub CLI (`gh`).
 #
-# Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
+# Prerequisites:
+#  - `gh` installed and authenticated with admin access to target repos.
 #
-# Usage Examples:
-#   bash 3-gh-setup-rulesets.sh                                 # public repos
-#   OWNER="username" bash 3-gh-setup-rulesets.sh
-#   REPOS="my-repo" bash 3-gh-setup-rulesets.sh     # single repo
-#   REPOS="repo1,repo2" bash 3-gh-setup-rulesets.sh  # multiple
+# Usage examples:
+#  OWNER="username" bash 3-gh-setup-rulesets.sh
+#  REPOS="my-repo" OWNER="username" bash 3-gh-setup-rulesets.sh
+#  REPOS="repo1,repo2" OWNER="username" bash 3-gh-setup-rulesets.sh
 
 set -euo pipefail
 
-# REQUIRED: You must be authenticated with GitHub CLI
-# Run `gh auth login` first if you haven't
+# Note: run `gh auth login` to authenticate before executing this script
 
 # === CONFIGURATION ===
 # OWNER: GitHub user or org name (override via environment: OWNER="username")

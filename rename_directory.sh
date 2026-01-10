@@ -1,18 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# rename_directory.sh
+# Summary: Rename a directory by converting its name to uppercase.
+# Usage: bash rename_directory.sh <directory>
 
-# Check if the directory argument is provided
+set -euo pipefail
+
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <directory>"
     exit 1
 fi
 
 current_dir="$1"
-
-# Convert the directory name to uppercase
 new_dir=$(echo "$current_dir" | tr '[:lower:]' '[:upper:]')
 
-# Rename the directory
+# Perform rename
 mv "$current_dir" "$new_dir"
-
 echo "Directory name changed to $new_dir"
 

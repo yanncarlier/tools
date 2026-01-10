@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# File: 2-gh-delete-rulesets.sh
-# Purpose: Deletes all repository rulesets from specified repositories.
-# Rulesets are GitHub branch protection rules (require PR reviews, block deletions, etc.).
-# Use this to reset protection policies or prepare for fresh configuration.
+# 2-gh-delete-rulesets.sh
+# Summary: Remove all repository rulesets (branch protection rules) for a set
+# of repositories using the GitHub CLI. This permanently deletes rulesets.
 #
-# Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
-# ⚠️  WARNING: This script DELETES all rulesets. Use with caution!
+# Prerequisites:
+#  - `gh` installed and authenticated with admin access to target repos.
 #
-# Usage Examples:
-#   bash 2-gh-delete-rulesets.sh                           # public repos
-#   OWNER="username" bash 2-gh-delete-rulesets.sh
+# Usage:
+#  OWNER="username" bash 2-gh-delete-rulesets.sh
+#
+# WARNING: This script deletes rulesets and cannot be undone. Review target
+# repositories carefully before running.
 
 set -euo pipefail
 

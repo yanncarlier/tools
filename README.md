@@ -235,90 +235,49 @@ REPOS="username/repo1,username/repo2,username/repo3" bash 3-gh-setup-ruleset-bra
 
 # Multiple repos with Copilot Code Review
 REPOS="username/repo1,username/repo2" bash 5-gh-copilot-code-review.sh
+README
+======
 
-# Disable CodeQL for multiple repos
-REPOS="repo1 repo2" OWNER="username" bash 4-gh-disable-codeql.sh
-```
+Small collection of Bash helper scripts for managing GitHub repositories and
+related system tasks. Use with care — some scripts perform destructive actions.
 
-### Interactive Mode (Confirm Each Change)
-```bash
-# Prompt before each API call (works with any script)
-PROMPT_BEFORE_API=true FETCH_ALL_REPOS=true OWNER="username" bash 4-gh-disable-codeql.sh
-PROMPT_BEFORE_API=true FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
-```
+Prerequisites
+-------------
+- Install GitHub CLI: https://cli.github.com
+- Authenticate: `gh auth login`
+- Have appropriate permissions (admin/write) for targeted repositories
 
-### Combined Security Setup
-```bash
-# Full security stack: dev branches + rulesets + Copilot Code Review (CodeQL disabled)
-OWNER="username" bash 1-gh-setup-dev-branches.sh
-REPOS="username/my-repo" bash 3-gh-setup-ruleset-branches.sh
-REPOS="username/my-repo" bash 5-gh-copilot-code-review.sh
-```
+Quick start
+-----------
+Run a script with an OWNER or REPOS environment variable. Examples:
 
----
+    OWNER="my-org" bash 1-gh-setup-dev-branches.sh
+    REPOS="repo1 repo2" OWNER="my-user" bash 4-gh-disable-codeql.sh
 
-## Environment Variables Reference
+Scripts
+-------
+- `1-gh-setup-dev-branches.sh` — ensure a `dev` branch (or custom name) exists.
+- `2-gh-delete-rulesets.sh` — delete all repository rulesets (destructive).
+- `3-gh-setup-rulesets.sh` — create/replace branch protection rulesets.
+- `4-gh-disable-codeql.sh` — disable CodeQL default setup; optionally remove workflows.
+- `5-gh-copilot-code-review.sh` — create Copilot Code Review rulesets (requires Copilot).
+- `delete_all_containers.sh` — stop/remove Docker containers, images, volumes (destructive).
+- `disable_services_ubuntu24.sh` — disable a list of services on Ubuntu 24.04.
+- `git_fetch_pull_all_subfolders.sh` — run `git fetch` and `git pull` in subfolders.
+- `rename_directory.sh` — rename a directory to uppercase.
 
-### Universal (All Scripts)
+Caution
+-------
+- Review scripts before running. Several are destructive (delete rulesets, Docker images,
+  or disable services).
+- Use `PROMPT_BEFORE_API=true` where supported to enable interactive confirmations.
+
+Support
+-------
+- Check individual script headers for usage and environment variables.
+- Verify `gh auth status` before running GitHub-related scripts.
+
+License
+-------
+MIT
 - `OWNER`: GitHub user or organization name
-
-### Script 1: `1-gh-setup-dev-branches.sh`
-- `DEV_BRANCH`: Name of dev branch to create (default: `"dev"`)
-- `REPOS_TO_PROCESS`: Specific repos to target; if empty, fetches public repos from GitHub
-
-### Script 2: `2-gh-delete-ruleset-branches.sh`
-- `OWNER`: GitHub user or organization name
-
-### Script 3: `3-gh-setup-ruleset-branches.sh`
-- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`); if empty, fetches public repos from GitHub
-
-### Script 4: `4-gh-disable-codeql.sh`
-- `OWNER`: GitHub user or organization name
-- `REPOS`: Space-separated list of repo names (no owner prefix)
-- `FETCH_ALL_REPOS`: Fetch all public repos from GitHub instead of using REPOS list (default: `false`)
-- `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
-- `DELETE_CODEQL_WORKFLOW`: Also delete `.github/workflows/codeql-analysis.yml` files (default: `false`)
-
-### Script 5: `5-gh-copilot-code-review.sh`
-- `OWNER`: GitHub user or organization name
-- `REPOS`: Single or comma-separated repo list (e.g., `"owner/repo1,owner/repo2"`); if empty, fetches public repos from GitHub
-- `FETCH_ALL_REPOS`: Fetch all public repos from GitHub instead of hardcoded list (default: `false`)
-- `PROMPT_BEFORE_API`: Interactive mode; prompt before each API call (default: `false`)
-- `RULESET_NAME`: Name of Copilot ruleset (default: `"copilot-code-review-default"`)
-- `ENABLE_DISMISS_STALE_APPROVALS`: Auto-dismiss reviews on new commits (default: `true`)
-
----
-
-## Troubleshooting
-
-### "the owner handle 'username' was not recognized"
-- **Cause**: Script is using hardcoded `"username"` instead of actual owner name
-- **Fix**: Set `OWNER` environment variable: `OWNER="username" bash script.sh`
-
-
-
----
-
-## Notes
-
-- All scripts run non-interactively by default. Use `PROMPT_BEFORE_API=true` for confirmation prompts.
-- Failed API calls are reported but do not stop script execution.
-- Archived repositories are automatically skipped.
-- Scripts support up to 1000 repositories per owner (GitHub API limit).
-- Created files (`.github/dependabot.yml`, workflows) are committed directly; consider creating a PR instead.
-
----
-
-## License
-
-MIT (or as specified in your repository)
-
----
-
-## Support
-
-For issues or questions:
-1. Check script comments for detailed explanations
-2. Run with `PROMPT_BEFORE_API=true` to see detailed error messages
-3. Verify GitHub CLI authentication: `gh auth status`
-4. Check repository Actions tab for workflow logs

@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
-# File: 4-gh-disable-codeql.sh
-# Purpose: Disables CodeQL code scanning across multiple repositories.
-# This includes:
-# - Disabling CodeQL default setup (if enabled) via API using {"state": "not-configured"}.
-# - Optionally deleting any custom CodeQL workflow file (.github/workflows/codeql-analysis.yml) if it exists.
+# 4-gh-disable-codeql.sh
+# Summary: Disable CodeQL default configuration and optionally remove custom
+# CodeQL workflow files from listed repositories using `gh`.
 #
-# Prerequisites: GitHub CLI (gh) authenticated with repo access.
-#                Run: gh auth login
+# Prerequisites:
+#  - `gh` installed and authenticated with access to target repositories.
 #
-# Usage Examples:
-#   REPOS="tools" OWNER="username" DELETE_CODEQL_WORKFLOW=true bash disable-codeql.sh
-#   REPOS="repo1 repo2 repo3" OWNER="username" bash disable-codeql.sh
-#   FETCH_ALL_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash disable-codeql.sh
-#   PROMPT_BEFORE_API=true REPOS="tools" bash disable-codeql.sh
+# Usage examples:
+#  REPOS="repo1 repo2" OWNER="username" bash 4-gh-disable-codeql.sh
+#  FETCH_ALL_REPOS=true OWNER="username" DELETE_CODEQL_WORKFLOW=true bash 4-gh-disable-codeql.sh
+#  PROMPT_BEFORE_API=true REPOS="tools" OWNER="username" bash 4-gh-disable-codeql.sh
 
 set -euo pipefail
 

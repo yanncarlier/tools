@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
-# File: 5-gh-copilot-code-review.sh
-# Purpose: Sets up GitHub Copilot Code Review rulesets for automated code analysis.
-# Enables: Copilot-powered code reviews, static analysis tool management, and PR automation
-# on the default branch with customizable bypass policies for admins.
+# 5-gh-copilot-code-review.sh
+# Summary: Create Copilot Code Review rulesets to enforce automated PR analysis
+# on target repositories' default branches. Uses the GitHub CLI (`gh`).
 #
-# Prerequisites: GitHub CLI (gh) authentication with admin access. Run: gh auth login
-# Note: Copilot Code Review requires GitHub Copilot Enterprise or Team subscription.
+# Prerequisites:
+#  - `gh` installed and authenticated with admin access
+#  - Organization must have GitHub Copilot (Team/Enterprise) enabled
 #
-# Usage Examples:
-#   bash 5-gh-copilot-code-review.sh                                      # hardcoded repos
-#   FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
-#   REPOS="my-repo" bash 5-gh-copilot-code-review.sh   # single repo
-#   REPOS="repo1,repo2" bash 5-gh-copilot-code-review.sh  # multiple
+# Usage examples:
+#  FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
+#  REPOS="my-repo" OWNER="username" bash 5-gh-copilot-code-review.sh
 
 set -euo pipefail
 

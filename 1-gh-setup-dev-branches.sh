@@ -1,63 +1,65 @@
 #!/usr/bin/env bash
-# File: 1-gh-setup-dev-branches.sh
-# Purpose: Creates a development branch (default: 'dev') across multiple repositories.
-# This script enables a consistent dev branch across your repository landscape, useful for
-# establishing a standard branching strategy across all projects.
+# 1-gh-setup-dev-branches.sh
+# Summary: Ensure a development branch (default: "dev") exists across multiple
+# repositories using the GitHub CLI (`gh`).
 #
-# Prerequisites: GitHub CLI (gh) authentication. Run: gh auth login
+# Prerequisites:
+#  - GitHub CLI installed and authenticated: `gh auth login`
 #
-# Usage Examples:
-#   bash 1-gh-setup-dev-branches.sh                              # public repos only
-#   OWNER="username" bash 1-gh-setup-dev-branches.sh
-#s
-# Notes:
-#   - Use OWNER env var to override the hardcoded owner (repo must exist for authenticated user)
-#   - Dev branch is created from the repository's default branch (main/master)
-#   - If dev branch already exists, the script skips creation and reports success
+# Usage:
+#  OWNER="username" bash 1-gh-setup-dev-branches.sh
+#  OWNER="username" REPOS="repo1,repo2" bash 1-gh-setup-dev-branches.sh
+#
+# Environment variables:
+#  - OWNER: GitHub user/org (default: "username")
+#  - DEV_BRANCH: branch name to create (default: "dev")
+#  - REPOS: comma-separated list of repos (e.g., "repo1,repo2"). If empty, public repos for OWNER are fetched.
 
 set -euo pipefail
 
-# === CONFIGURATION ===
-# OWNER: GitHub user or org name (override via environment: OWNER="username")
 OWNER=${OWNER:-"username"}
-
-# DEV_BRANCH: Name of the branch to create in all repositories (default: 'dev')
-# This branch is created from the repository's default branch
 DEV_BRANCH="dev"
 
-# REPOS_TO_PROCESS: Specific repos to target. If empty, fetches public repos for OWNER.
-# Examples: REPOS_TO_PROCESS=("repo1" "repo2") or set via env: REPOS_TO_PROCESS="repo1,repo2"
-REPOS_TO_PROCESS=()
-
-# === FETCH REPOSITORIES ===
 echo "Fetching repositories for $OWNER..."
-if [ ${#REPOS_TO_PROCESS[@]} -eq 0 ]; then
-  # No repos specified: fetch public repositories from GitHub
-  echo "  (fetching public repositories)"
-  mapfile -t REPOS_TO_PROCESS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
+if [ -n "${REPOS:-}" ]; then
+  # Parse comma-separated REPOS from environment
+  echo "Using provided REPOS"
+  IFS=',' read -r -a REPOS_ARRAY <<< "$REPOS"
+  REPOS=()
+  for r in "${REPOS_ARRAY[@]}"; do
+    # Trim whitespace and prefix with OWNER if needed
+    r="${r// /}"
+    if [[ "$r" == *"/"* ]]; then
+      REPOS+=("$r")
+    else
+      REPOS+=("$OWNER/$r")
+    fi
+  done
 else
-  # Repos specified in array: add OWNER prefix if not already present (handle "repo" → "owner/repo")
-  REPOS_TO_PROCESS=( "${REPOS_TO_PROCESS[@]/#/$OWNER/}" )
+  # Fetch public repos for OWNER from GitHub
+  REPOS=()
+  echo "  (fetching public repositories)"
+  mapfile -t REPOS < <(gh repo list "$OWNER" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' --visibility public)
 fi
 # === PROCESS REPOSITORIES ===
-for repo in "${REPOS_TO_PROCESS[@]}"; do
+for repo in "${REPOS[@]}"; do
   echo "=========================================="
   echo "Processing $repo"
   
-  # Check if dev branch already exists via GitHub API
+  # Check if dev branch exists
   if ! gh api -X GET "repos/$repo/branches/$DEV_BRANCH" > /dev/null 2>&1; then
-    # Branch doesn't exist: create it from the repository's default branch (main/master/etc.)
+    # Branch missing: create from default
     echo "  → Creating branch $DEV_BRANCH from default branch"
     default_branch=$(gh api "repos/$repo" --jq '.default_branch')
-    # Get the commit SHA of the default branch and create a new ref pointing to it
+    # Fetch commit SHA and create new ref
     gh api "repos/$repo/git/refs" \
       -f ref="refs/heads/$DEV_BRANCH" \
       -f sha="$(gh api repos/$repo/branches/$default_branch --jq '.commit.sha')" > /dev/null
     echo "  → $DEV_BRANCH created"
   else
-    # Branch already exists: report and skip
+    # Already exists: skip
     echo "  → $DEV_BRANCH already exists"
   fi
 done
 echo "=========================================="
-echo "All done! $DEV_BRANCH exists and $OWNER across ${#REPOS_TO_PROCESS[@]} repositories."
+echo "All done! $DEV_BRANCH exists across ${#REPOS[@]} repositories for $OWNER."
