@@ -8,7 +8,6 @@
 #  - Organization must have GitHub Copilot (Team/Enterprise) enabled
 #
 # Usage examples:
-#  FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh
 #  REPOS="my-repo" OWNER="username" bash 5-gh-copilot-code-review.sh
 
 set -euo pipefail
@@ -21,20 +20,8 @@ OWNER=${OWNER:-"username"}
 # Examples: REPOS="my-repo" or REPOS="repo1,repo2"
 # If not provided, script fetches all repos for OWNER based on INCLUDE_PRIVATE_REPOS flag.
 
-# REPOS_TO_PROCESS: List of repos to configure. If empty and FETCH_ALL_REPOS=true,
-# fetches repos from GitHub. Default hardcoded list: empty (requires explicit action)
+# REPOS_TO_PROCESS: List of repos to configure. Populate via the `REPOS` env var
 REPOS_TO_PROCESS=()
-
-# FETCH_ALL_REPOS: If true, override REPOS_TO_PROCESS and fetch all public repos for OWNER
-# from GitHub instead of using the hardcoded list.
-# Usage: `FETCH_ALL_REPOS=true OWNER="username" bash 5-gh-copilot-code-review.sh`
-if [ "${FETCH_ALL_REPOS:-false}" = "true" ]; then
-  REPOS_TO_PROCESS=()
-fi
-
-# PROMPT_BEFORE_API: If true, prompt user before each API call (interactive mode)
-# Default: false (non-interactive, auto-approve). Usage: `PROMPT_BEFORE_API=true bash 5-gh-copilot-code-review.sh`
-PROMPT_BEFORE_API=${PROMPT_BEFORE_API:-false}
 
 # RULESET_NAME: Name of the Copilot Code Review ruleset to create/manage
 # Default: "copilot-code-review-default" (protects default branch)
@@ -123,32 +110,14 @@ setup_copilot_ruleset() {
 EOF
   
   # 3. Create the Copilot Code Review ruleset
-  if [ "$PROMPT_BEFORE_API" = true ]; then
-    read -r -p "  -> Will POST 'repos/$repo/rulesets' to create Copilot Code Review ruleset. Proceed? [y/N] " yn
-    if [[ "$yn" =~ ^[Yy]$ ]]; then
-      response=$(gh api "repos/$repo/rulesets" --method POST --input /tmp/copilot-ruleset.json 2>&1 || true)
-      if echo "$response" | grep -q "id"; then
-        echo "  -> Copilot Code Review ruleset created successfully"
-        return 0
-      else
-        echo "  -> ERROR: Failed to create Copilot Code Review ruleset"
-        echo "  -> Response: $response"
-        return 1
-      fi
-    else
-      echo "  -> Skipped Copilot Code Review ruleset creation"
-      return 0
-    fi
+  response=$(gh api "repos/$repo/rulesets" --method POST --input /tmp/copilot-ruleset.json 2>&1 || true)
+  if echo "$response" | grep -q "id"; then
+    echo "  -> Copilot Code Review ruleset created successfully"
+    return 0
   else
-    response=$(gh api "repos/$repo/rulesets" --method POST --input /tmp/copilot-ruleset.json 2>&1 || true)
-    if echo "$response" | grep -q "id"; then
-      echo "  -> Copilot Code Review ruleset created successfully"
-      return 0
-    else
-      echo "  -> ERROR: Failed to create Copilot Code Review ruleset"
-      echo "  -> Response: $response"
-      return 1
-    fi
+    echo "  -> ERROR: Failed to create Copilot Code Review ruleset"
+    echo "  -> Response: $response"
+    return 1
   fi
 }
 
