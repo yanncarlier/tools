@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 # ===============================================================
-# create-vscode-profile.sh
-# Create an isolated VS Code profile with copied settings/extensions
+# create-cursor-profile.sh
+# Create an isolated VS cursor profile with copied settings/extensions
 # ===============================================================
 # Usage examples:
-#   ./create-vscode-profile.sh rust
-#   ./create-vscode-profile.sh go
-#   ./create-vscode-profile.sh python-datascience
-#   ./create-vscode-profile.sh cpp-competitive
-#   ./create-vscode-profile.sh minimal
+#   ./create-cursor-profile.sh rust
+#   ./create-cursor-profile.sh go
+#   ./create-cursor-profile.sh python-datascience
+#   ./create-cursor-profile.sh cpp-competitive
+#   ./create-cursor-profile.sh minimal
 
 set -euo pipefail
 
-BASE_DIR="$HOME/vscode-profiles"
-SOURCE_CONFIG="$HOME/.config/Code"
-SOURCE_EXTENSIONS="$HOME/.vscode/extensions"
+BASE_DIR="$HOME/cursor-profiles"
+SOURCE_CONFIG="$HOME/.config/Cursor"
+SOURCE_EXTENSIONS="$HOME/.cursor/extensions"
 
 # ── Colors ────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -68,7 +68,7 @@ if [ -d "$PROFILE_DIR" ]; then
     rm -rf "$PROFILE_DIR"
 fi
 
-echo "Creating VS Code profile: $PROFILE_NAME"
+echo "Creating VS cursor profile: $PROFILE_NAME"
 echo "Location: $PROFILE_DIR"
 
 mkdir -p "$PROFILE_DIR"/{data,extensions}
@@ -101,8 +101,8 @@ echo
 success "Profile '$PROFILE_NAME' created successfully!"
 echo
 echo "To use it, run:"
-echo "  code --user-data-dir \"$PROFILE_DIR/data\" --extensions-dir \"$PROFILE_DIR/extensions\" ."
+echo "  cursor --user-data-dir \"$PROFILE_DIR/data\" --extensions-dir \"$PROFILE_DIR/extensions\" ."
 echo
 echo "Or create an alias/shortcut, for example:"
-echo "  alias code-rust='code --user-data-dir \"$PROFILE_DIR/data\" --extensions-dir \"$PROFILE_DIR/extensions\"'"
+echo "  alias cursor-rust='cursor --user-data-dir \"$PROFILE_DIR/data\" --extensions-dir \"$PROFILE_DIR/extensions\"'"
 echo
