@@ -256,15 +256,23 @@ Run a script with an OWNER or REPOS environment variable. Examples:
 
 Scripts
 -------
+### GitHub Management
 - `1-gh-setup-dev-branches.sh` — ensure a `dev` branch (or custom name) exists.
 - `2-gh-delete-rulesets.sh` — delete all repository rulesets (destructive).
 - `3-gh-setup-rulesets.sh` — create/replace branch protection rulesets.
 - `4-gh-disable-codeql.sh` — disable CodeQL default setup; optionally remove workflows.
-- `5-gh-copilot-code-review.sh` — create Copilot Code Review rulesets (requires Copilot).
-- `delete_all_containers.sh` — stop/remove Docker containers, images, volumes (destructive).
-- `disable_services_ubuntu24.sh` — disable a list of services on Ubuntu 24.04.
-- `git_fetch_pull_all_subfolders.sh` — run `git fetch` and `git pull` in subfolders.
-- `rename_directory.sh` — rename a directory to uppercase.
+- `5-gh-copilot-code-review.sh` — create Copilot Code Review rulesets (requires Copilot)
+
+### Development Environment
+- `create-vscode-profile.sh` — create a VS Code profile with custom settings
+- `create-cursor-profile.sh` — set up a Cursor editor profile
+- `create-windsurf-profile.sh` — configure a Windsurf development environment profile
+
+### System Administration
+- `delete_all_containers.sh` — stop/remove Docker containers, images, volumes (destructive)
+- `disable_services_ubuntu24.sh` — disable a list of services on Ubuntu 24.04
+- `git_fetch_pull_all_subfolders.sh` — run `git fetch` and `git pull` in subfolders
+- `rename_directory.sh` — rename a directory to uppercase
 
 Caution
 -------
